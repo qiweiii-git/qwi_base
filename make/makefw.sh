@@ -9,17 +9,14 @@
 #!/bin/bash
 
 BuildDir='.build'
-CompileFileDir='make'
-ReturnRoute='../..'
 BitFileDir='impl_1/'
 CopyBitRoute='../../../..'
 
 PrjName=$1
 ChipType=$2
-BuildFileDir=$3
+BuildTclDir=$3
 CopyBitFileDir=$4
 CopyHdf=$5
-IverilogCompile=$6
 echo "Info: Project Name is $PrjName, ChipType is $ChipType"
 
 #make dir
@@ -33,23 +30,13 @@ echo "Info: Building Directory $BuildDir Establish"
 
 #copy source files
 cp * $BuildDir -r
-
-#compiling
-if [ $IverilogCompile -eq 1 ]; then
-   cd $BuildDir/$CompileFileDir
-   echo "Info: $PrjName is compiling"
-   ./compile.sh
-
-   if [ ! -e fwCompiled ]; then
-      echo "Error: $PrjName Project compile failed"
-      exit
-   fi
-   echo "Info: $PrjName is compiled"
-   cd $ReturnRoute
-fi
+cp .depend $BuildDir -r
 
 #building
-cd $BuildDir/$BuildFileDir
+cd $BuildDir/build
+if [ ! -f run.tcl ]; then
+   cp ../$BuildTclDir/run.tcl ./
+fi
 echo "Run $PrjName $ChipType 0" >> run.tcl
 echo "Info: $PrjName $ChipType is building"
 vivado -mode batch -source run.tcl
@@ -63,7 +50,7 @@ if [ -f $PrjName.bit ]; then
    cp $PrjName.bit $CopyBitRoute/$CopyBitFileDir
    echo "Info: $PrjName bit file moved to $CopyBitFileDir"
    if [ $CopyHdf -eq 1 ]; then
-      cp $CopyBitRoute/$BuildDir/$BuildFileDir/$PrjName.sdk/$PrjName.hdf $CopyBitRoute/$CopyBitFileDir
+      cp $CopyBitRoute/$BuildDir/build/$PrjName.sdk/$PrjName.hdf $CopyBitRoute/$CopyBitFileDir
       echo "Info: $PrjName hdf file moved to $CopyBitFileDir"
    fi
    cp $PrjName\_timing_summary_routed.rpt $CopyBitRoute/$CopyBitFileDir

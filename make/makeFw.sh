@@ -9,7 +9,7 @@
 #*****************************************************************************
 #!/bin/bash
 
-BuildDir='.build'
+BuildDir='.buildFw'
 BitFileDir='impl_1/'
 CopyBitRoute='../../../..'
 
@@ -60,7 +60,7 @@ if [ -f $PrjName.bit ]; then
    echo "Info: $PrjName build log files moved to $CopyBitFileDir"
    #clean
    cd $CopyBitRoute
-   rm -rf $BuildDir
+   #rm -rf $BuildDir
    echo "Info: $PrjName finish building"
    echo -e "\n   Success \n"
 else

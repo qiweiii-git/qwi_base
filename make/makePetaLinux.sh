@@ -7,31 +7,48 @@
 #*****************************************************************************
 #!/bin/bash
 
-BuildDir='.build'
+BuildDir='.buildPetaLinux'
+CreateNew='1'
 
 PrjName=$1
 SrcFileDir=$2
+CreateNew=$3
+
+if [ ! -d $BuildDir ]; then
+   CreateNew='1'
+fi
 
 #make dir
-if [ -d $BuildDir ]; then
-   echo "Warning: Building Directory $BuildDir Exist"
-   rm -r $BuildDir
-   echo "Info: Old Building Directory $BuildDir Removing"
-fi
-mkdir $BuildDir
-echo "Info: Building Directory $FileSys/$BuildDir Establish"
+if [ $CreateNew -eq 1 ]; then
+   if [ -d $BuildDir ]; then
+      echo "Warning: Building Directory $BuildDir Exist"
+      rm -r $BuildDir
+      echo "Info: Old Building Directory $BuildDir Removing"
+   fi
+   mkdir $BuildDir
+   echo "Info: Building Directory $FileSys/$BuildDir Establish"
 
-#copy files
-cp $SrcFileDir/* $BuildDir -r
+   #copy files
+   cp $SrcFileDir/* $BuildDir -r
+fi
 
 # petalinux configure
 cd $BuildDir
-petalinux-create --type project --template zynq --name $PrjName
+if [ $CreateNew -eq 1 ]; then
+   petalinux-create --type project --template zynq --name $PrjName
+fi
+
 cd $PrjName
-petalinux-config --get-hw-description ../
+if [ $CreateNew -eq 1 ]; then
+   petalinux-config --get-hw-description ../
+else
+   petalinux-config
+fi
 
 # petalinux custom app
-petalinux-create -t apps --template c --name $PrjName --enable
+if [ $CreateNew -eq 1 ]; then
+   petalinux-create -t apps --template c --name $PrjName --enable
+fi
 cp ../../software/* components/apps/$PrjName/
 
 #petalinux-config -c kernel
@@ -55,7 +72,7 @@ if [ -f BOOT.BIN ]; then
    echo "Info: BOOT.BIN file moved to $SrcFileDir"
    cd ../../../../
    #clean
-   rm -rf $BuildDir
+   #rm -rf $BuildDir
    echo "Info: BOOT.BIN file finish making"
    echo -e "\n   Success \n"
 else
